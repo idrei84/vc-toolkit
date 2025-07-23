@@ -403,7 +403,7 @@
                 source: "https://valenciacollege.edu/admissions/college-access.php"
             },
             {
-                question: "Which of the following is NOT a covered program option under College Access?",
+                question: "Which of the following is NOT a program option under the College Access program?",
                 options: [
                     "A.A. degree",
                     "A.S. degree",
@@ -417,7 +417,7 @@
                 question: "What is Valencia College's mascot?",
                 options: [
                     "A Panther",
-                    "A Knight",
+                    "A Knight", 
                     "A Puma",
                     "A Falcon"
                 ],
@@ -500,6 +500,21 @@
         function showQuestion() {
             const question = currentQuestions[currentQuestionIndex];
             
+            // Create shuffled options with original indices
+            const shuffledOptions = question.options.map((option, index) => ({
+                text: option,
+                originalIndex: index
+            }));
+            
+            // Shuffle the options
+            for (let i = shuffledOptions.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffledOptions[i], shuffledOptions[j]] = [shuffledOptions[j], shuffledOptions[i]];
+            }
+            
+            // Store the shuffled options for this question
+            currentQuestions[currentQuestionIndex].shuffledOptions = shuffledOptions;
+            
             // Update progress
             const progress = ((currentQuestionIndex) / currentQuestions.length) * 100;
             document.getElementById('progressFill').style.width = progress + '%';
@@ -509,15 +524,15 @@
             document.getElementById('questionText').textContent = question.question;
             document.getElementById('sourceLink').innerHTML = `<a href="${question.source}" target="_blank" rel="noopener noreferrer">📖 Source: Click here if you need to search for the answer</a>`;
             
-            // Update options
+            // Update options with shuffled order
             const optionsContainer = document.getElementById('optionsContainer');
             optionsContainer.innerHTML = '';
             
-            question.options.forEach((option, index) => {
+            shuffledOptions.forEach((option, displayIndex) => {
                 const optionDiv = document.createElement('div');
                 optionDiv.className = 'option';
-                optionDiv.textContent = option;
-                optionDiv.onclick = () => selectOption(index, optionDiv);
+                optionDiv.textContent = option.text;
+                optionDiv.onclick = () => selectOption(option.originalIndex, optionDiv);
                 optionsContainer.appendChild(optionDiv);
             });
             
@@ -527,13 +542,13 @@
             document.getElementById('nextBtn').textContent = currentQuestionIndex === currentQuestions.length - 1 ? 'Finish Quiz' : 'Next Question';
         }
 
-        function selectOption(index, element) {
+        function selectOption(originalIndex, element) {
             // Remove previous selection
             document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
             
             // Add selection to clicked option
             element.classList.add('selected');
-            selectedAnswer = index;
+            selectedAnswer = originalIndex; // Store the original index for validation
             
             // Enable next button
             document.getElementById('nextBtn').disabled = false;
