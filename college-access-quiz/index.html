@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valencia College Access Quiz</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #57564F, #7A7A73);
+            min-height: 100vh;
+            padding: 10px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            background: linear-gradient(135deg, #F8F3CE, #DDDAD0);
+            color: #57564F;
+            text-align: center;
+            padding: 30px 20px;
+            position: relative;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 20px;
+            background: white;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(255,255,255,0.3);
+        }
+
+        .subtitle {
+            font-size: 16px;
+            opacity: 0.8;
+            margin-bottom: 15px;
+        }
+
+        .puma-emoji {
+            font-size: 40px;
+            margin: 10px 0;
+            display: block;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .content {
+            padding: 30px 20px;
+        }
+
+        .start-screen, .quiz-screen, .results-screen {
+            text-align: center;
+        }
+
+        .start-screen h2 {
+            color: #57564F;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        .start-screen p {
+            margin-bottom: 20px;
+            line-height: 1.6;
+            color: #666;
+        }
+
+        .question-container {
+            margin-bottom: 30px;
+            text-align: left;
+        }
+
+        .question-header {
+            background: #F8F3CE;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 5px solid #7A7A73;
+        }
+
+        .question-number {
+            color: #57564F;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .question-text {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 5px;
+            line-height: 1.4;
+        }
+
+        .source-link {
+            font-size: 12px;
+            margin-top: 10px;
+        }
+
+        .source-link a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .source-link a:hover {
+            text-decoration: underline;
+        }
+
+        .options {
+            display: grid;
+            gap: 10px;
+        }
+
+        .option {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .option:hover {
+            border-color: #7A7A73;
+            background: #F8F3CE;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(122,122,115,0.2);
+        }
+
+        .option.selected {
+            border-color: #7A7A73;
+            background: #F8F3CE;
+            color: #57564F;
+            font-weight: bold;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #7A7A73, #57564F);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 5px 15px rgba(87,86,79,0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(87,86,79,0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: #e9ecef;
+            border-radius: 3px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #7A7A73, #57564F);
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+
+        .results-screen {
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .score-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #7A7A73, #57564F);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin: 20px auto;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .score-circle::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .congrats {
+            font-size: 28px;
+            color: #57564F;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+
+        .swag-message {
+            background: linear-gradient(135deg, #DDDAD0, #F8F3CE);
+            color: #57564F;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            font-size: 18px;
+            font-weight: bold;
+            text-shadow: none;
+            border: 2px solid #7A7A73;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            color: #666;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 5px;
+                border-radius: 15px;
+            }
+            
+            .content {
+                padding: 20px 15px;
+            }
+            
+            .logo {
+                font-size: 24px;
+            }
+            
+            .question-text {
+                font-size: 16px;
+            }
+            
+            .option {
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">Valencia College</div>
+            <div class="subtitle">College Access Program</div>
+            <span class="puma-emoji">🐾</span>
+        </div>
+
+        <div class="content">
+            <!-- Start Screen -->
+            <div id="startScreen" class="start-screen">
+                <h2>Quiz & Scavenger Hunt</h2>
+                <p>Test your knowledge about Valencia College and the College Access program! Complete this quick 5-question quiz to earn your swag ticket.</p>
+                <p><strong>Instructions:</strong> You'll get 5 random questions from our question bank. Each question includes a source link if you need to search for the answer.</p>
+                <button class="btn" onclick="startQuiz()">Start Quiz</button>
+            </div>
+
+            <!-- Quiz Screen -->
+            <div id="quizScreen" class="quiz-screen hidden">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                
+                <div class="question-container">
+                    <div class="question-header">
+                        <div class="question-number" id="questionNumber">Question 1 of 5</div>
+                        <div class="question-text" id="questionText"></div>
+                        <div class="source-link" id="sourceLink"></div>
+                    </div>
+                    
+                    <div class="options" id="optionsContainer"></div>
+                </div>
+                
+                <button class="btn" id="nextBtn" onclick="nextQuestion()" disabled>Next Question</button>
+            </div>
+
+            <!-- Results Screen -->
+            <div id="resultsScreen" class="results-screen hidden">
+                <div class="congrats">Congratulations!</div>
+                <div class="score-circle">
+                    <span id="finalScore">0/5</span>
+                </div>
+                <div id="resultMessage"></div>
+                <div class="swag-message" id="swagMessage">
+                    🎉 Show this screen to claim your Valencia College swag! 🎉
+                </div>
+                <button class="btn" onclick="restartQuiz()">Take Quiz Again</button>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Valencia College - College Access Program<br>
+            Making higher education accessible for Jones and Evans High School graduates</p>
+        </div>
+    </div>
+
+    <script>
+        // Question bank
+        const questionBank = [
+            {
+                question: "Who is eligible for the College Access pilot program?",
+                options: [
+                    "Any Florida high school graduate",
+                    "Students graduating from Jones or Evans High School in 2025",
+                    "All Valencia College applicants",
+                    "Students with a GED from any county"
+                ],
+                correct: 1,
+                source: "https://valenciacollege.edu/admissions/college-access.php"
+            },
+            {
+                question: "What does the College Access program cover?",
+                options: [
+                    "Only books and supplies",
+                    "Tuition and fees at any Florida college",
+                    "Tuition and fees at Valencia College",
+                    "Housing and meal plans"
+                ],
+                correct: 2,
+                source: "https://valenciacollege.edu/admissions/college-access.php"
+            },
+            {
+                question: "What must students complete to qualify for College Access?",
+                options: [
+                    "A scholarship essay",
+                    "A Valencia College tour",
+                    "The FAFSA",
+                    "A letter of recommendation"
+                ],
+                correct: 2,
+                source: "https://valenciacollege.edu/admissions/college-access.php"
+            },
+            {
+                question: "What is the deadline to enroll at Valencia College under the College Access program?",
+                options: [
+                    "Fall 2025",
+                    "Spring H2 2026",
+                    "Summer 2026",
+                    "There is no deadline"
+                ],
+                correct: 1,
+                source: "https://valenciacollege.edu/admissions/college-access.php"
+            },
+            {
+                question: "Which of the following is NOT a program option under the College Access program?",
+                options: [
+                    "A.A. degree",
+                    "A.S. degree",
+                    "Accelerated Skills Training",
+                    "Bachelor's degree at UCF"
+                ],
+                correct: 3,
+                source: "https://valenciacollege.edu/admissions/college-access.php"
+            },
+            {
+                question: "What is Valencia College's mascot?",
+                options: [
+                    "Panther",
+                    "Knight",
+                    "Puma",
+                    "Falcon"
+                ],
+                correct: 2,
+                source: "https://valenciacollege.edu/about/mascot/"
+            },
+            {
+                question: "Which of the following is a Valencia College campus?",
+                options: [
+                    "Winter Park",
+                    "Lake Mary",
+                    "Apopka",
+                    "Daytona Beach"
+                ],
+                correct: 0,
+                source: "https://valenciacollege.edu/locations/"
+            },
+            {
+                question: "What is the minimum number of college-level credits required to earn an Associate in Arts (A.A.) degree at Valencia?",
+                options: [
+                    "45",
+                    "60",
+                    "72",
+                    "90"
+                ],
+                correct: 1,
+                source: "https://catalog.valenciacollege.edu/degrees/associateinarts/courserequirements/"
+            },
+            {
+                question: "What is Valencia College's FAFSA code?",
+                options: [
+                    "007650",
+                    "006750",
+                    "005750",
+                    "008750"
+                ],
+                correct: 1,
+                source: "https://catalog.valenciacollege.edu/financialaid/applicationinstructions/"
+            },
+            {
+                question: "Which of the following is a career-focused degree offered at Valencia College?",
+                options: [
+                    "Bachelor of Arts",
+                    "Associate in Science",
+                    "Master of Education",
+                    "Doctor of Philosophy"
+                ],
+                correct: 1,
+                source: "https://catalog.valenciacollege.edu/degrees/associateinscience/"
+            }
+        ];
+
+        let currentQuestions = [];
+        let currentQuestionIndex = 0;
+        let selectedAnswer = null;
+        let score = 0;
+
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        function startQuiz() {
+            // Select 5 random questions
+            currentQuestions = shuffleArray(questionBank).slice(0, 5);
+            currentQuestionIndex = 0;
+            selectedAnswer = null;
+            score = 0;
+
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('quizScreen').classList.remove('hidden');
+            
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const question = currentQuestions[currentQuestionIndex];
+            
+            // Update progress
+            const progress = ((currentQuestionIndex) / currentQuestions.length) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+            
+            // Update question info
+            document.getElementById('questionNumber').textContent = `Question ${currentQuestionIndex + 1} of ${currentQuestions.length}`;
+            document.getElementById('questionText').textContent = question.question;
+            document.getElementById('sourceLink').innerHTML = `<a href="${question.source}" target="_blank" rel="noopener noreferrer">📖 Source: Click here if you need to search for the answer</a>`;
+            
+            // Update options
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option';
+                optionDiv.textContent = option;
+                optionDiv.onclick = () => selectOption(index, optionDiv);
+                optionsContainer.appendChild(optionDiv);
+            });
+            
+            // Reset next button
+            selectedAnswer = null;
+            document.getElementById('nextBtn').disabled = true;
+            document.getElementById('nextBtn').textContent = currentQuestionIndex === currentQuestions.length - 1 ? 'Finish Quiz' : 'Next Question';
+        }
+
+        function selectOption(index, element) {
+            // Remove previous selection
+            document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+            
+            // Add selection to clicked option
+            element.classList.add('selected');
+            selectedAnswer = index;
+            
+            // Enable next button
+            document.getElementById('nextBtn').disabled = false;
+        }
+
+        function nextQuestion() {
+            if (selectedAnswer === null) return;
+            
+            // Check if answer is correct
+            if (selectedAnswer === currentQuestions[currentQuestionIndex].correct) {
+                score++;
+            }
+            
+            currentQuestionIndex++;
+            
+            if (currentQuestionIndex < currentQuestions.length) {
+                showQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            document.getElementById('quizScreen').classList.add('hidden');
+            document.getElementById('resultsScreen').classList.remove('hidden');
+            
+            document.getElementById('finalScore').textContent = `${score}/${currentQuestions.length}`;
+            
+            let message = '';
+            if (score === currentQuestions.length) {
+                message = "Perfect score! You're a Valencia College expert! 🌟";
+            } else if (score >= Math.ceil(currentQuestions.length * 0.8)) {
+                message = "Excellent work! You know your Valencia College facts! 🎯";
+            } else if (score >= Math.ceil(currentQuestions.length * 0.6)) {
+                message = "Good job! You're well on your way to Valencia College mastery! 👍";
+            } else {
+                message = "Nice try! Consider exploring the Valencia College website to learn more! 📚";
+            }
+            
+            document.getElementById('resultMessage').innerHTML = `<p style="font-size: 18px; margin: 20px 0; color: #666;">${message}</p>`;
+            
+            // Show swag message for any completion
+            document.getElementById('swagMessage').style.display = 'block';
+        }
+
+        function restartQuiz() {
+            document.getElementById('resultsScreen').classList.add('hidden');
+            document.getElementById('startScreen').classList.remove('hidden');
+        }
+
+        // Initialize progress bar
+        document.getElementById('progressFill').style.width = '0%';
+    </script>
+</body>
+</html>
