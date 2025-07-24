@@ -314,6 +314,7 @@
                 <h2>Quiz & Scavenger Hunt</h2>
                 <p>Test your knowledge about Valencia College and the College Access program! Complete this quick 5-question quiz to earn your swag ticket.</p>
                 <p><strong>Instructions:</strong> You'll get 5 random questions from our question bank. Each question includes a source link if you need to search for the answer.</p>
+                <p><strong>🎯 Swag Challenge:</strong> Score at least <strong>4 out of 5</strong> questions correctly to earn your Valencia College swag!</p>
                 <button class="btn" onclick="startQuiz()">Start Quiz</button>
             </div>
 
@@ -426,7 +427,7 @@
                 source: "https://valenciacollege.edu/about/mascot/"
             },
             {
-                question: "Which of the following cities has a Valencia College campus?",
+                question: "Which of the following is a Valencia College campus?",
                 options: [
                     "Winter Park",
                     "Lake Mary",
@@ -578,21 +579,34 @@
             
             document.getElementById('finalScore').textContent = `${score}/${currentQuestions.length}`;
             
+            const swagQualifying = score >= 4; // Need at least 4/5 for swag
+            
             let message = '';
             if (score === currentQuestions.length) {
                 message = "Perfect score! You're a Valencia College expert! 🌟";
-            } else if (score >= Math.ceil(currentQuestions.length * 0.8)) {
+            } else if (score >= 4) {
                 message = "Excellent work! You know your Valencia College facts! 🎯";
-            } else if (score >= Math.ceil(currentQuestions.length * 0.6)) {
-                message = "Good job! You're well on your way to Valencia College mastery! 👍";
+            } else if (score === 3) {
+                message = "Good effort! You're close - try again to earn your swag! 📚";
             } else {
-                message = "Nice try! Consider exploring the Valencia College website to learn more! 📚";
+                message = "Nice try! Review the source links and take the quiz again to earn your swag! 🔄";
             }
             
             document.getElementById('resultMessage').innerHTML = `<p style="font-size: 18px; margin: 20px 0; color: #666;">${message}</p>`;
             
-            // Show swag message for any completion
-            document.getElementById('swagMessage').style.display = 'block';
+            // Show different messages based on performance
+            const swagMessageElement = document.getElementById('swagMessage');
+            if (swagQualifying) {
+                swagMessageElement.innerHTML = "🎉 Congratulations! Show this screen to claim your Valencia College swag! 🎉";
+                swagMessageElement.style.display = 'block';
+                swagMessageElement.style.background = 'linear-gradient(135deg, #DDDAD0, #F8F3CE)';
+                swagMessageElement.style.borderColor = '#7A7A73';
+            } else {
+                swagMessageElement.innerHTML = "📚 Score at least 4/5 to earn swag! Use the source links to research and try again! 🔄";
+                swagMessageElement.style.display = 'block';
+                swagMessageElement.style.background = 'linear-gradient(135deg, #f8d7da, #f5c6cb)';
+                swagMessageElement.style.borderColor = '#dc3545';
+            }
         }
 
         function restartQuiz() {
