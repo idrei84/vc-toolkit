@@ -15,7 +15,7 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 20px;
+            padding: 15px;
             color: #333;
         }
 
@@ -73,24 +73,48 @@
             text-align: center;
         }
 
+        .controls {
+            padding: 10px 20px;
+            text-align: center;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .shuffle-btn {
+            background: linear-gradient(135deg, #ff6b6b, #ffa500);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .shuffle-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255,107,107,0.3);
+        }
+
         .bingo-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 1px;
             background: #e9ecef;
-            padding: 20px;
+            padding: 15px;
         }
 
         .bingo-square {
             background: white;
             border: none;
-            padding: 15px 8px;
-            font-size: 11px;
-            line-height: 1.3;
+            padding: 12px 6px;
+            font-size: 10px;
+            line-height: 1.2;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
-            min-height: 90px;
+            min-height: 75px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -112,14 +136,15 @@
         }
 
         .bingo-square.completed:hover {
-            transform: scale(0.98);
+            transform: scale(1.02);
         }
 
-        .completed-name {
-            font-size: 10px;
+        .completed-info {
+            font-size: 8px;
             font-weight: 600;
             margin-top: 4px;
             opacity: 0.9;
+            line-height: 1.1;
         }
 
         .modal {
@@ -156,15 +181,20 @@
             margin-bottom: 20px;
             color: #666;
             font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
         }
 
         .modal input {
             width: 100%;
-            padding: 12px;
+            padding: 10px;
             border: 2px solid #e9ecef;
             border-radius: 8px;
-            font-size: 16px;
-            margin-bottom: 20px;
+            font-size: 14px;
+            margin-bottom: 10px;
             transition: border-color 0.3s ease;
         }
 
@@ -209,6 +239,15 @@
             background: #e9ecef;
         }
 
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
         .completion-message {
             display: none;
             background: linear-gradient(135deg, #00d4aa, #00a8ff);
@@ -227,7 +266,7 @@
         .instructions {
             padding: 15px 20px;
             background: #f8f9fa;
-            font-size: 13px;
+            font-size: 12px;
             color: #666;
             text-align: center;
             line-height: 1.4;
@@ -249,11 +288,15 @@
             <div class="progress-bar">
                 <div class="progress-fill" id="progressFill"></div>
             </div>
-            <div class="progress-text" id="progressText">0 of 18 completed</div>
+            <div class="progress-text" id="progressText">0 of 21 completed</div>
+        </div>
+
+        <div class="controls">
+            <button class="shuffle-btn" onclick="newGame()">🎲 New Card</button>
         </div>
 
         <div class="instructions">
-            Tap each square when you find someone who matches! Enter their name to mark it complete.
+            Tap squares to add info when you find matches! Click completed squares to edit.
         </div>
 
         <div class="bingo-grid" id="bingoGrid">
@@ -261,21 +304,25 @@
         </div>
     </div>
 
-    <!-- Modal for name entry -->
-    <div class="modal" id="nameModal">
+    <!-- Modal for info entry -->
+    <div class="modal" id="infoModal">
         <div class="modal-content">
-            <h3>Great find!</h3>
-            <p id="modalText">Enter the name of the person who matches this description:</p>
-            <input type="text" id="nameInput" placeholder="Enter name here..." autocomplete="off">
-            <div class="modal-buttons">
+            <h3 id="modalTitle">Great find!</h3>
+            <p id="modalText">Enter details for this person:</p>
+            <div class="input-group">
+                <input type="text" id="nameInput" placeholder="Name" autocomplete="off">
+                <input type="text" id="disciplineInput" placeholder="Discipline (e.g., English, Spanish)" autocomplete="off">
+                <input type="text" id="campusInput" placeholder="Campus (e.g., East, West, Osceola)" autocomplete="off">
+            </div>
+            <div class="modal-buttons" id="modalButtons">
                 <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-                <button class="btn btn-primary" onclick="saveName()">Save</button>
+                <button class="btn btn-primary" onclick="saveInfo()">Save</button>
             </div>
         </div>
     </div>
 
     <script>
-        const bingoItems = [
+        const allBingoItems = [
             "Has read 3+ books this summer",
             "Plays a musical instrument", 
             "Has been skydiving or bungee jumping",
@@ -293,32 +340,102 @@
             "Can make bread from scratch",
             "Has more than 3 pets",
             "Loves heavy metal or punk music",
-            "Has done karaoke recently"
+            "Has done karaoke recently",
+            "Speaks 3+ languages fluently",
+            "Has lived in another country",
+            "Can change a car tire",
+            "Has been to Disney World 10+ times",
+            "Listens to podcasts daily",
+            "Has taken a dance class as an adult",
+            "Uses a standing desk at work",
+            "Has been to a midnight movie premiere",
+            "Knows sign language (ASL)",
+            "Has performed in community theater",
+            "Owns a motorcycle or has ridden one",
+            "Can cook a meal from scratch without a recipe",
+            "Has been teaching for less than 5 years",
+            "Has been teaching for more than 15 years",
+            "Has published something (article, book, blog)",
+            "Volunteers regularly in the community",
+            "Has traveled to 5+ countries",
+            "Can play chess",
+            "Has won a contest or competition",
+            "Meditates or practices yoga regularly",
+            "Has built something with their hands",
+            "Knows how to code/program",
+            "Has performed stand-up comedy",
+            "Can name all 50 U.S. state capitals"
         ];
 
+        let selectedBingoItems = [];
         let completedSquares = 0;
         let currentSquareIndex = -1;
         let gameData = {};
+        let isEditing = false;
 
-        // Load saved data from localStorage
+        // Shuffle array function
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        // Generate random card
+        function generateRandomCard() {
+            const shuffled = shuffleArray(allBingoItems);
+            return shuffled.slice(0, 21);
+        }
+
+        // Load or create game data
         function loadGameData() {
             const saved = localStorage.getItem('facultyBingo');
             if (saved) {
-                gameData = JSON.parse(saved);
-                completedSquares = Object.keys(gameData).length;
-                updateProgress();
+                const data = JSON.parse(saved);
+                selectedBingoItems = data.items || generateRandomCard();
+                gameData = data.completions || {};
+            } else {
+                selectedBingoItems = generateRandomCard();
+                gameData = {};
             }
+            completedSquares = Object.keys(gameData).length;
+            updateProgress();
+            saveGameData();
         }
 
-        // Save game data to localStorage
+        // Save game data
         function saveGameData() {
-            localStorage.setItem('facultyBingo', JSON.stringify(gameData));
+            const data = {
+                items: selectedBingoItems,
+                completions: gameData
+            };
+            localStorage.setItem('facultyBingo', JSON.stringify(data));
+        }
+
+        // Generate new game
+        function newGame() {
+            if (Object.keys(gameData).length > 0) {
+                if (!confirm('This will reset your current progress. Are you sure?')) {
+                    return;
+                }
+            }
+            selectedBingoItems = generateRandomCard();
+            gameData = {};
+            completedSquares = 0;
+            document.getElementById('completionMessage').style.display = 'none';
+            updateProgress();
+            generateGrid();
+            saveGameData();
         }
 
         // Generate bingo grid
         function generateGrid() {
             const grid = document.getElementById('bingoGrid');
-            bingoItems.forEach((item, index) => {
+            grid.innerHTML = '';
+            
+            selectedBingoItems.forEach((item, index) => {
                 const square = document.createElement('button');
                 square.className = 'bingo-square';
                 square.innerHTML = item;
@@ -327,54 +444,125 @@
                 // Check if this square was previously completed
                 if (gameData[index]) {
                     square.classList.add('completed');
-                    square.innerHTML = item + '<div class="completed-name">' + gameData[index] + '</div>';
+                    const info = gameData[index];
+                    square.innerHTML = item + 
+                        '<div class="completed-info">' + 
+                        info.name + '<br>' + 
+                        info.discipline + '<br>' + 
+                        info.campus + 
+                        '</div>';
                 }
                 
                 grid.appendChild(square);
             });
         }
 
-        // Open name entry modal
+        // Open info entry modal
         function openModal(squareIndex) {
-            // Don't open modal if already completed
-            if (gameData[squareIndex]) return;
-            
             currentSquareIndex = squareIndex;
+            const isCompleted = gameData[squareIndex];
+            isEditing = isCompleted;
+            
+            document.getElementById('modalTitle').textContent = 
+                isCompleted ? 'Edit Information' : 'Great find!';
             document.getElementById('modalText').textContent = 
-                `Enter the name of the person who: "${bingoItems[squareIndex]}"`;
-            document.getElementById('nameInput').value = '';
-            document.getElementById('nameModal').style.display = 'flex';
+                `"${selectedBingoItems[squareIndex]}"`;
+            
+            // Pre-fill if editing
+            if (isCompleted) {
+                document.getElementById('nameInput').value = gameData[squareIndex].name || '';
+                document.getElementById('disciplineInput').value = gameData[squareIndex].discipline || '';
+                document.getElementById('campusInput').value = gameData[squareIndex].campus || '';
+            } else {
+                document.getElementById('nameInput').value = '';
+                document.getElementById('disciplineInput').value = '';
+                document.getElementById('campusInput').value = '';
+            }
+
+            // Update buttons for editing
+            const buttonsContainer = document.getElementById('modalButtons');
+            if (isCompleted) {
+                buttonsContainer.innerHTML = `
+                    <button class="btn btn-danger" onclick="removeEntry()">Remove</button>
+                    <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button class="btn btn-primary" onclick="saveInfo()">Update</button>
+                `;
+            } else {
+                buttonsContainer.innerHTML = `
+                    <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button class="btn btn-primary" onclick="saveInfo()">Save</button>
+                `;
+            }
+            
+            document.getElementById('infoModal').style.display = 'flex';
             document.getElementById('nameInput').focus();
         }
 
         // Close modal
         function closeModal() {
-            document.getElementById('nameModal').style.display = 'none';
+            document.getElementById('infoModal').style.display = 'none';
             currentSquareIndex = -1;
+            isEditing = false;
         }
 
-        // Save name and mark square as complete
-        function saveName() {
+        // Remove entry
+        function removeEntry() {
+            if (gameData[currentSquareIndex]) {
+                delete gameData[currentSquareIndex];
+                saveGameData();
+                
+                // Update the square
+                const squares = document.querySelectorAll('.bingo-square');
+                const square = squares[currentSquareIndex];
+                square.classList.remove('completed');
+                square.innerHTML = selectedBingoItems[currentSquareIndex];
+                
+                // Update progress
+                completedSquares = Object.keys(gameData).length;
+                updateProgress();
+                
+                // Hide completion message if shown
+                document.getElementById('completionMessage').style.display = 'none';
+            }
+            closeModal();
+        }
+
+        // Save info and mark square as complete
+        function saveInfo() {
             const name = document.getElementById('nameInput').value.trim();
-            if (!name) return;
+            const discipline = document.getElementById('disciplineInput').value.trim();
+            const campus = document.getElementById('campusInput').value.trim();
+            
+            if (!name) {
+                alert('Please enter a name');
+                return;
+            }
 
             // Save to game data
-            gameData[currentSquareIndex] = name;
+            gameData[currentSquareIndex] = {
+                name: name,
+                discipline: discipline,
+                campus: campus
+            };
             saveGameData();
 
             // Update the square
             const squares = document.querySelectorAll('.bingo-square');
             const square = squares[currentSquareIndex];
             square.classList.add('completed');
-            square.innerHTML = bingoItems[currentSquareIndex] + 
-                '<div class="completed-name">' + name + '</div>';
+            square.innerHTML = selectedBingoItems[currentSquareIndex] + 
+                '<div class="completed-info">' + 
+                name + '<br>' + 
+                (discipline || '') + (discipline && campus ? '<br>' : '') +
+                (campus || '') + 
+                '</div>';
 
             // Update progress
             completedSquares = Object.keys(gameData).length;
             updateProgress();
 
             // Check for completion
-            if (completedSquares === 18) {
+            if (completedSquares === 21) {
                 setTimeout(showCompletion, 300);
             }
 
@@ -383,10 +571,10 @@
 
         // Update progress bar and text
         function updateProgress() {
-            const percentage = (completedSquares / 18) * 100;
+            const percentage = (completedSquares / 21) * 100;
             document.getElementById('progressFill').style.width = percentage + '%';
             document.getElementById('progressText').textContent = 
-                `${completedSquares} of 18 completed`;
+                `${completedSquares} of 21 completed`;
         }
 
         // Show completion message
@@ -395,9 +583,9 @@
         }
 
         // Handle Enter key in modal
-        document.getElementById('nameInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                saveName();
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && document.getElementById('infoModal').style.display === 'flex') {
+                saveInfo();
             }
         });
 
