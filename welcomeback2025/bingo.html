@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faculty Bingo - Find Someone Who...</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #ff6b6b, #ffa500);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .progress {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .progress-bar {
+            background: #e9ecef;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #00d4aa, #00a8ff);
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .progress-text {
+            font-size: 14px;
+            color: #666;
+            text-align: center;
+        }
+
+        .bingo-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1px;
+            background: #e9ecef;
+            padding: 20px;
+        }
+
+        .bingo-square {
+            background: white;
+            border: none;
+            padding: 15px 8px;
+            font-size: 11px;
+            line-height: 1.3;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-height: 90px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            border-radius: 8px;
+        }
+
+        .bingo-square:hover {
+            background: #f8f9fa;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .bingo-square.completed {
+            background: linear-gradient(135deg, #00d4aa, #00a8ff);
+            color: white;
+            transform: scale(0.98);
+        }
+
+        .bingo-square.completed:hover {
+            transform: scale(0.98);
+        }
+
+        .completed-name {
+            font-size: 10px;
+            font-weight: 600;
+            margin-top: 4px;
+            opacity: 0.9;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            width: 100%;
+            max-width: 350px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        .modal h3 {
+            margin-bottom: 15px;
+            color: #333;
+            font-size: 18px;
+        }
+
+        .modal p {
+            margin-bottom: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .modal input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            transition: border-color 0.3s ease;
+        }
+
+        .modal input:focus {
+            outline: none;
+            border-color: #00a8ff;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00d4aa, #00a8ff);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,168,255,0.3);
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #666;
+            border: 1px solid #e9ecef;
+        }
+
+        .btn-secondary:hover {
+            background: #e9ecef;
+        }
+
+        .completion-message {
+            display: none;
+            background: linear-gradient(135deg, #00d4aa, #00a8ff);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-weight: 600;
+            animation: slideDown 0.5s ease;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(0); }
+        }
+
+        .instructions {
+            padding: 15px 20px;
+            background: #f8f9fa;
+            font-size: 13px;
+            color: #666;
+            text-align: center;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Find Someone Who...</h1>
+            <p>Valencia School of Speech and Languages</p>
+        </div>
+
+        <div class="completion-message" id="completionMessage">
+            🎉 Congratulations! You've completed your bingo card! 🎉
+        </div>
+
+        <div class="progress">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text" id="progressText">0 of 18 completed</div>
+        </div>
+
+        <div class="instructions">
+            Tap each square when you find someone who matches! Enter their name to mark it complete.
+        </div>
+
+        <div class="bingo-grid" id="bingoGrid">
+            <!-- Squares will be generated by JavaScript -->
+        </div>
+    </div>
+
+    <!-- Modal for name entry -->
+    <div class="modal" id="nameModal">
+        <div class="modal-content">
+            <h3>Great find!</h3>
+            <p id="modalText">Enter the name of the person who matches this description:</p>
+            <input type="text" id="nameInput" placeholder="Enter name here..." autocomplete="off">
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveName()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const bingoItems = [
+            "Has read 3+ books this summer",
+            "Plays a musical instrument", 
+            "Has been skydiving or bungee jumping",
+            "Knows how to juggle",
+            "Has run a 5K or marathon",
+            "Is a craft beer enthusiast",
+            "Has been to a concert this year",
+            "Can solve a Rubik's cube",
+            "Watches reality TV shows",
+            "Has a vegetable garden",
+            "Collects something unusual",
+            "Has been camping in the last year",
+            "Plays video games regularly",
+            "Has tried exotic food (insects, etc.)",
+            "Can make bread from scratch",
+            "Has more than 3 pets",
+            "Loves heavy metal or punk music",
+            "Has done karaoke recently"
+        ];
+
+        let completedSquares = 0;
+        let currentSquareIndex = -1;
+        let gameData = {};
+
+        // Load saved data from localStorage
+        function loadGameData() {
+            const saved = localStorage.getItem('facultyBingo');
+            if (saved) {
+                gameData = JSON.parse(saved);
+                completedSquares = Object.keys(gameData).length;
+                updateProgress();
+            }
+        }
+
+        // Save game data to localStorage
+        function saveGameData() {
+            localStorage.setItem('facultyBingo', JSON.stringify(gameData));
+        }
+
+        // Generate bingo grid
+        function generateGrid() {
+            const grid = document.getElementById('bingoGrid');
+            bingoItems.forEach((item, index) => {
+                const square = document.createElement('button');
+                square.className = 'bingo-square';
+                square.innerHTML = item;
+                square.onclick = () => openModal(index);
+                
+                // Check if this square was previously completed
+                if (gameData[index]) {
+                    square.classList.add('completed');
+                    square.innerHTML = item + '<div class="completed-name">' + gameData[index] + '</div>';
+                }
+                
+                grid.appendChild(square);
+            });
+        }
+
+        // Open name entry modal
+        function openModal(squareIndex) {
+            // Don't open modal if already completed
+            if (gameData[squareIndex]) return;
+            
+            currentSquareIndex = squareIndex;
+            document.getElementById('modalText').textContent = 
+                `Enter the name of the person who: "${bingoItems[squareIndex]}"`;
+            document.getElementById('nameInput').value = '';
+            document.getElementById('nameModal').style.display = 'flex';
+            document.getElementById('nameInput').focus();
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('nameModal').style.display = 'none';
+            currentSquareIndex = -1;
+        }
+
+        // Save name and mark square as complete
+        function saveName() {
+            const name = document.getElementById('nameInput').value.trim();
+            if (!name) return;
+
+            // Save to game data
+            gameData[currentSquareIndex] = name;
+            saveGameData();
+
+            // Update the square
+            const squares = document.querySelectorAll('.bingo-square');
+            const square = squares[currentSquareIndex];
+            square.classList.add('completed');
+            square.innerHTML = bingoItems[currentSquareIndex] + 
+                '<div class="completed-name">' + name + '</div>';
+
+            // Update progress
+            completedSquares = Object.keys(gameData).length;
+            updateProgress();
+
+            // Check for completion
+            if (completedSquares === 18) {
+                setTimeout(showCompletion, 300);
+            }
+
+            closeModal();
+        }
+
+        // Update progress bar and text
+        function updateProgress() {
+            const percentage = (completedSquares / 18) * 100;
+            document.getElementById('progressFill').style.width = percentage + '%';
+            document.getElementById('progressText').textContent = 
+                `${completedSquares} of 18 completed`;
+        }
+
+        // Show completion message
+        function showCompletion() {
+            document.getElementById('completionMessage').style.display = 'block';
+        }
+
+        // Handle Enter key in modal
+        document.getElementById('nameInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                saveName();
+            }
+        });
+
+        // Initialize the game
+        window.onload = function() {
+            loadGameData();
+            generateGrid();
+        };
+    </script>
+</body>
+</html>
