@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas Syllabus Generator</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        .form-panel, .preview-panel {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .panel-header {
+            background: linear-gradient(135deg, #4a5568, #2d3748);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .panel-header h2 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .panel-content {
+            padding: 30px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .form-group input, 
+        .form-group textarea, 
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus, 
+        .form-group textarea:focus, 
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .generate-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .copy-btn {
+            width: 100%;
+            padding: 12px;
+            background: #48bb78;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: background-color 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: #38a169;
+        }
+
+        /* Syllabus Styles */
+        .syllabus {
+            font-family: Georgia, 'Times New Roman', serif;
+            line-height: 1.6;
+            color: #2d3748;
+        }
+
+        .syllabus-header {
+            background: linear-gradient(135deg, #2b6cb0, #3182ce);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .syllabus-header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .syllabus-header .course-details {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .instructor-info {
+            background: #f7fafc;
+            border-left: 5px solid #3182ce;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .instructor-info h3 {
+            color: #2b6cb0;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .contact-icon {
+            width: 20px;
+            height: 20px;
+            background: #3182ce;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+        }
+
+        .syllabus-section {
+            margin-bottom: 30px;
+            padding: 25px;
+            background: white;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .syllabus-section h3 {
+            color: #2b6cb0;
+            border-bottom: 2px solid #bee3f8;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+        }
+
+        .syllabus-section p {
+            margin-bottom: 15px;
+        }
+
+        .syllabus-section ul, .syllabus-section ol {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        .syllabus-section li {
+            margin-bottom: 8px;
+        }
+
+        .schedule-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .schedule-table th, .schedule-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .schedule-table th {
+            background: #edf2f7;
+            color: #2d3748;
+            font-weight: 600;
+        }
+
+        .schedule-table tr:hover {
+            background: #f7fafc;
+        }
+
+        .highlight-box {
+            background: #fef5e7;
+            border: 1px solid #f6ad55;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .highlight-box h4 {
+            color: #c05621;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .code-output {
+            background: #1a202c;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Form Panel -->
+        <div class="form-panel">
+            <div class="panel-header">
+                <h2>🎓 Syllabus Generator</h2>
+                <p>Fill out the form to generate Canvas-ready HTML</p>
+            </div>
+            <div class="panel-content">
+                <form id="syllabusForm">
+                    <div class="form-group">
+                        <label for="courseTitle">Course Title *</label>
+                        <input type="text" id="courseTitle" name="courseTitle" value="Introduction to Digital Marketing" required>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="courseCode">Course Code *</label>
+                            <input type="text" id="courseCode" name="courseCode" value="MKTG 101" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="credits">Credits</label>
+                            <input type="number" id="credits" name="credits" value="3" min="1" max="6">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="semester">Semester</label>
+                            <select id="semester" name="semester">
+                                <option value="Fall 2025" selected>Fall 2025</option>
+                                <option value="Spring 2025">Spring 2025</option>
+                                <option value="Summer 2025">Summer 2025</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="section">Section</label>
+                            <input type="text" id="section" name="section" value="001">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="instructorName">Instructor Name *</label>
+                        <input type="text" id="instructorName" name="instructorName" value="Dr. Sarah Johnson" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email" value="s.johnson@university.edu">
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Phone</label>
+                            <input type="tel" id="phone" name="phone" value="(555) 123-4567">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="office">Office Location</label>
+                            <input type="text" id="office" name="office" value="Business Building, Room 205">
+                        </div>
+                        <div class="form-group">
+                            <label for="officeHours">Office Hours</label>
+                            <input type="text" id="officeHours" name="officeHours" value="Tue/Thu 2:00-4:00 PM">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="courseDescription">Course Description *</label>
+                        <textarea id="courseDescription" name="courseDescription" rows="4" required>This course provides a comprehensive introduction to digital marketing strategies, tools, and analytics. Students will learn to develop, implement, and measure digital marketing campaigns across various platforms including social media, search engines, and email marketing.</textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="learningObjectives">Learning Objectives</label>
+                        <textarea id="learningObjectives" name="learningObjectives" rows="4">Upon completion of this course, students will be able to:
+• Develop comprehensive digital marketing strategies
+• Analyze consumer behavior in digital environments
+• Create and optimize content for various digital platforms
+• Measure and interpret digital marketing analytics</textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="gradingPolicy">Grading Policy</label>
+                        <textarea id="gradingPolicy" name="gradingPolicy" rows="4">Participation: 10%
+Assignments: 30%
+Midterm Exam: 25%
+Final Project: 35%
+
+Grading Scale: A (90-100%), B (80-89%), C (70-79%), D (60-69%), F (Below 60%)</textarea>
+                    </div>
+
+                    <button type="submit" class="generate-btn">✨ Generate Syllabus HTML</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Preview Panel -->
+        <div class="preview-panel">
+            <div class="panel-header">
+                <h2>📋 Live Preview</h2>
+                <p>See how your syllabus will look in Canvas</p>
+            </div>
+            <div class="panel-content">
+                <div id="syllabusPreview">
+                    <div class="syllabus">
+                        <div class="syllabus-header">
+                            <h1 id="preview-title">Introduction to Digital Marketing</h1>
+                            <div class="course-details">
+                                <span id="preview-code">MKTG 101</span> • 
+                                <span id="preview-credits">3</span> Credits • 
+                                <span id="preview-semester">Fall 2025</span> • 
+                                Section <span id="preview-section">001</span>
+                            </div>
+                        </div>
+
+                        <div class="instructor-info">
+                            <h3>👨‍🏫 Instructor Information</h3>
+                            <div class="contact-grid">
+                                <div class="contact-item">
+                                    <div class="contact-icon">👤</div>
+                                    <span id="preview-instructor">Dr. Sarah Johnson</span>
+                                </div>
+                                <div class="contact-item">
+                                    <div class="contact-icon">📧</div>
+                                    <span id="preview-email">s.johnson@university.edu</span>
+                                </div>
+                                <div class="contact-item">
+                                    <div class="contact-icon">📱</div>
+                                    <span id="preview-phone">(555) 123-4567</span>
+                                </div>
+                                <div class="contact-item">
+                                    <div class="contact-icon">🏢</div>
+                                    <span id="preview-office">Business Building, Room 205</span>
+                                </div>
+                                <div class="contact-item">
+                                    <div class="contact-icon">🕒</div>
+                                    <span id="preview-hours">Tue/Thu 2:00-4:00 PM</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="syllabus-section">
+                            <h3>📚 Course Description</h3>
+                            <p id="preview-description">This course provides a comprehensive introduction to digital marketing strategies, tools, and analytics. Students will learn to develop, implement, and measure digital marketing campaigns across various platforms including social media, search engines, and email marketing.</p>
+                        </div>
+
+                        <div class="syllabus-section">
+                            <h3>🎯 Learning Objectives</h3>
+                            <div id="preview-objectives">
+                                <p>Upon completion of this course, students will be able to:</p>
+                                <ul>
+                                    <li>Develop comprehensive digital marketing strategies</li>
+                                    <li>Analyze consumer behavior in digital environments</li>
+                                    <li>Create and optimize content for various digital platforms</li>
+                                    <li>Measure and interpret digital marketing analytics</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="syllabus-section">
+                            <h3>📊 Grading Policy</h3>
+                            <div id="preview-grading">
+                                <p>Participation: 10%<br>
+                                Assignments: 30%<br>
+                                Midterm Exam: 25%<br>
+                                Final Project: 35%</p>
+                                
+                                <p><strong>Grading Scale:</strong> A (90-100%), B (80-89%), C (70-79%), D (60-69%), F (Below 60%)</p>
+                            </div>
+                        </div>
+
+                        <div class="highlight-box">
+                            <h4>📢 Important Note</h4>
+                            <p>This syllabus is subject to change. Students will be notified of any modifications via Canvas announcements.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <button id="copyHtmlBtn" class="copy-btn">📋 Copy HTML Code</button>
+                
+                <div class="code-output" id="htmlOutput" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let syllabusData = {};
+
+        // Update preview in real-time
+        function updatePreview() {
+            const formData = new FormData(document.getElementById('syllabusForm'));
+            
+            for (let [key, value] of formData.entries()) {
+                syllabusData[key] = value;
+            }
+
+            // Update preview elements
+            document.getElementById('preview-title').textContent = syllabusData.courseTitle || 'Course Title';
+            document.getElementById('preview-code').textContent = syllabusData.courseCode || 'COURSE 000';
+            document.getElementById('preview-credits').textContent = syllabusData.credits || '3';
+            document.getElementById('preview-semester').textContent = syllabusData.semester || 'Semester';
+            document.getElementById('preview-section').textContent = syllabusData.section || '001';
+            document.getElementById('preview-instructor').textContent = syllabusData.instructorName || 'Instructor Name';
+            document.getElementById('preview-email').textContent = syllabusData.email || 'email@university.edu';
+            document.getElementById('preview-phone').textContent = syllabusData.phone || 'Phone Number';
+            document.getElementById('preview-office').textContent = syllabusData.office || 'Office Location';
+            document.getElementById('preview-hours').textContent = syllabusData.officeHours || 'Office Hours';
+            document.getElementById('preview-description').textContent = syllabusData.courseDescription || 'Course description...';
+            
+            // Handle objectives (convert line breaks to list items)
+            const objectives = syllabusData.learningObjectives || '';
+            if (objectives.includes('•')) {
+                const objectivesList = objectives.split('•').filter(item => item.trim()).map(item => `<li>${item.trim()}</li>`).join('');
+                document.getElementById('preview-objectives').innerHTML = `<p>Upon completion of this course, students will be able to:</p><ul>${objectivesList}</ul>`;
+            } else {
+                document.getElementById('preview-objectives').innerHTML = `<p>${objectives}</p>`;
+            }
+            
+            // Handle grading policy (preserve line breaks)
+            const grading = syllabusData.gradingPolicy || 'Grading policy information...';
+            document.getElementById('preview-grading').innerHTML = grading.replace(/\n/g, '<br>');
+        }
+
+        // Generate HTML code
+        function generateHtml() {
+            const html = `
+<div class="syllabus" style="font-family: Georgia, 'Times New Roman', serif; line-height: 1.6; color: #2d3748;">
+    <div style="background: linear-gradient(135deg, #2b6cb0, #3182ce); color: white; padding: 30px; text-align: center; margin-bottom: 30px;">
+        <h1 style="font-size: 2.2rem; margin-bottom: 10px; font-weight: 300;">${syllabusData.courseTitle || 'Course Title'}</h1>
+        <div style="font-size: 1.1rem; opacity: 0.9;">
+            <span>${syllabusData.courseCode || 'COURSE 000'}</span> • 
+            <span>${syllabusData.credits || '3'}</span> Credits • 
+            <span>${syllabusData.semester || 'Semester'}</span> • 
+            Section <span>${syllabusData.section || '001'}</span>
+        </div>
+    </div>
+
+    <div style="background: #f7fafc; border-left: 5px solid #3182ce; padding: 20px; margin-bottom: 25px; border-radius: 0 8px 8px 0;">
+        <h3 style="color: #2b6cb0; margin-bottom: 15px; font-size: 1.3rem;">👨‍🏫 Instructor Information</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+            <div><strong>Name:</strong> ${syllabusData.instructorName || 'Instructor Name'}</div>
+            <div><strong>Email:</strong> ${syllabusData.email || 'email@university.edu'}</div>
+            <div><strong>Phone:</strong> ${syllabusData.phone || 'Phone Number'}</div>
+            <div><strong>Office:</strong> ${syllabusData.office || 'Office Location'}</div>
+            <div><strong>Office Hours:</strong> ${syllabusData.officeHours || 'Office Hours'}</div>
+        </div>
+    </div>
+
+    <div style="margin-bottom: 30px; padding: 25px; background: white; border-radius: 10px; border: 1px solid #e2e8f0;">
+        <h3 style="color: #2b6cb0; border-bottom: 2px solid #bee3f8; padding-bottom: 10px; margin-bottom: 20px; font-size: 1.4rem;">📚 Course Description</h3>
+        <p>${syllabusData.courseDescription || 'Course description...'}</p>
+    </div>
+
+    <div style="margin-bottom: 30px; padding: 25px; background: white; border-radius: 10px; border: 1px solid #e2e8f0;">
+        <h3 style="color: #2b6cb0; border-bottom: 2px solid #bee3f8; padding-bottom: 10px; margin-bottom: 20px; font-size: 1.4rem;">🎯 Learning Objectives</h3>
+        <div>${syllabusData.learningObjectives ? syllabusData.learningObjectives.replace(/\n/g, '<br>') : 'Learning objectives...'}</div>
+    </div>
+
+    <div style="margin-bottom: 30px; padding: 25px; background: white; border-radius: 10px; border: 1px solid #e2e8f0;">
+        <h3 style="color: #2b6cb0; border-bottom: 2px solid #bee3f8; padding-bottom: 10px; margin-bottom: 20px; font-size: 1.4rem;">📊 Grading Policy</h3>
+        <div>${syllabusData.gradingPolicy ? syllabusData.gradingPolicy.replace(/\n/g, '<br>') : 'Grading policy...'}</div>
+    </div>
+
+    <div style="background: #fef5e7; border: 1px solid #f6ad55; border-radius: 8px; padding: 20px; margin: 20px 0;">
+        <h4 style="color: #c05621; margin-bottom: 10px;">📢 Important Note</h4>
+        <p>This syllabus is subject to change. Students will be notified of any modifications via Canvas announcements.</p>
+    </div>
+</div>`;
+            
+            document.getElementById('htmlOutput').textContent = html;
+            document.getElementById('htmlOutput').style.display = 'block';
+        }
+
+        // Copy HTML to clipboard
+        async function copyToClipboard() {
+            try {
+                await navigator.clipboard.writeText(document.getElementById('htmlOutput').textContent);
+                const btn = document.getElementById('copyHtmlBtn');
+                const originalText = btn.textContent;
+                btn.textContent = '✅ Copied!';
+                btn.style.background = '#48bb78';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '#48bb78';
+                }, 2000);
+            } catch (err) {
+                alert('Failed to copy to clipboard. Please select and copy the HTML manually.');
+            }
+        }
+
+        // Event listeners
+        document.getElementById('syllabusForm').addEventListener('input', updatePreview);
+        document.getElementById('syllabusForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            updatePreview();
+            generateHtml();
+        });
+        document.getElementById('copyHtmlBtn').addEventListener('click', copyToClipboard);
+
+        // Initialize
+        updatePreview();
+    </script>
+</body>
+</html>
