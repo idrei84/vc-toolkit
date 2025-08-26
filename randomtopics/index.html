@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speech Topic Randomizer</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .section h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        input[type="text"], textarea {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            font-size: 1rem;
+            min-width: 200px;
+        }
+        
+        input[type="text"]:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        textarea {
+            resize: vertical;
+            height: 100px;
+            width: 100%;
+        }
+        
+        button {
+            padding: 12px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        
+        button:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .btn-danger {
+            background: #e74c3c;
+        }
+        
+        .btn-danger:hover {
+            background: #d63031;
+        }
+        
+        .btn-success {
+            background: #27ae60;
+        }
+        
+        .btn-success:hover {
+            background: #229954;
+        }
+        
+        .list {
+            margin-top: 15px;
+        }
+        
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: white;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .list-item span {
+            flex: 1;
+            margin-right: 10px;
+        }
+        
+        .assignments {
+            background: #e8f5e8;
+            border-left-color: #27ae60;
+        }
+        
+        .assignment-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 15px;
+            background: white;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .student-name {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        
+        .topic-text {
+            color: #7f8c8d;
+            font-style: italic;
+        }
+        
+        .randomize-btn {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            font-size: 1.1rem;
+            padding: 15px 30px;
+            border-radius: 50px;
+            margin: 20px auto;
+            display: block;
+            box-shadow: 0 6px 20px rgba(245, 87, 108, 0.3);
+        }
+        
+        .randomize-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(245, 87, 108, 0.4);
+        }
+        
+        .empty-state {
+            text-align: center;
+            color: #7f8c8d;
+            font-style: italic;
+            padding: 20px;
+        }
+        
+        @media (max-width: 600px) {
+            .input-group {
+                flex-direction: column;
+            }
+            
+            input[type="text"] {
+                min-width: auto;
+            }
+            
+            .assignment-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .header {
+                padding: 15px;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎲 Speech Topic Randomizer</h1>
+            <p>Recreate the excitement of drawing topics from a hat</p>
+        </div>
+        
+        <div class="content">
+            <!-- Students Section -->
+            <div class="section">
+                <h2>👥 Students</h2>
+                <div class="input-group">
+                    <input type="text" id="studentInput" placeholder="Enter student name">
+                    <button onclick="addStudent()">Add Student</button>
+                </div>
+                <div class="input-group">
+                    <textarea id="bulkStudents" placeholder="Or paste multiple names, one per line"></textarea>
+                    <button onclick="addBulkStudents()">Add All</button>
+                </div>
+                <div class="list" id="studentList"></div>
+            </div>
+            
+            <!-- Topics Section -->
+            <div class="section">
+                <h2>💬 Speech Topics</h2>
+                <div class="input-group">
+                    <input type="text" id="topicInput" placeholder="Enter a speech topic">
+                    <button onclick="addTopic()">Add Topic</button>
+                </div>
+                <div class="input-group">
+                    <textarea id="bulkTopics" placeholder="Or paste multiple topics, one per line"></textarea>
+                    <button onclick="addBulkTopics()">Add All</button>
+                </div>
+                <div class="list" id="topicList"></div>
+            </div>
+            
+            <!-- Randomize Button -->
+            <button class="randomize-btn" onclick="randomizeAssignments()">
+                🎲 Randomly Assign Topics!
+            </button>
+            
+            <!-- Assignments Section -->
+            <div class="section assignments" id="assignmentsSection" style="display: none;">
+                <h2>📋 Assignments</h2>
+                <div class="list" id="assignmentsList"></div>
+                <button onclick="clearAssignments()" class="btn-danger" style="margin-top: 15px;">Clear Assignments</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let students = [];
+        let topics = [];
+        let assignments = [];
+
+        // Load data from localStorage on page load
+        window.onload = function() {
+            const savedStudents = localStorage.getItem('speechRandomizer_students');
+            const savedTopics = localStorage.getItem('speechRandomizer_topics');
+            
+            if (savedStudents) {
+                students = JSON.parse(savedStudents);
+                renderStudents();
+            }
+            
+            if (savedTopics) {
+                topics = JSON.parse(savedTopics);
+                renderTopics();
+            }
+            
+            // Add sample data if nothing exists
+            if (students.length === 0 && topics.length === 0) {
+                addSampleData();
+            }
+        };
+
+        function addSampleData() {
+            students = ['Alex Johnson', 'Sam Chen', 'Taylor Rivera', 'Jordan Smith'];
+            topics = [
+                'If you could have dinner with any fictional character, who would it be and why?',
+                'Convince us that pineapple belongs (or doesn\'t belong) on pizza',
+                'If animals could talk, which species would be the rudest?',
+                'Design the worst possible superhero power'
+            ];
+            saveAndRender();
+        }
+
+        function saveAndRender() {
+            localStorage.setItem('speechRandomizer_students', JSON.stringify(students));
+            localStorage.setItem('speechRandomizer_topics', JSON.stringify(topics));
+            renderStudents();
+            renderTopics();
+        }
+
+        function addStudent() {
+            const input = document.getElementById('studentInput');
+            const name = input.value.trim();
+            if (name && !students.includes(name)) {
+                students.push(name);
+                input.value = '';
+                saveAndRender();
+            }
+        }
+
+        function addBulkStudents() {
+            const textarea = document.getElementById('bulkStudents');
+            const names = textarea.value.split('\n').map(name => name.trim()).filter(name => name);
+            names.forEach(name => {
+                if (!students.includes(name)) {
+                    students.push(name);
+                }
+            });
+            textarea.value = '';
+            saveAndRender();
+        }
+
+        function removeStudent(index) {
+            students.splice(index, 1);
+            saveAndRender();
+        }
+
+        function addTopic() {
+            const input = document.getElementById('topicInput');
+            const topic = input.value.trim();
+            if (topic && !topics.includes(topic)) {
+                topics.push(topic);
+                input.value = '';
+                saveAndRender();
+            }
+        }
+
+        function addBulkTopics() {
+            const textarea = document.getElementById('bulkTopics');
+            const newTopics = textarea.value.split('\n').map(topic => topic.trim()).filter(topic => topic);
+            newTopics.forEach(topic => {
+                if (!topics.includes(topic)) {
+                    topics.push(topic);
+                }
+            });
+            textarea.value = '';
+            saveAndRender();
+        }
+
+        function removeTopic(index) {
+            topics.splice(index, 1);
+            saveAndRender();
+        }
+
+        function renderStudents() {
+            const list = document.getElementById('studentList');
+            if (students.length === 0) {
+                list.innerHTML = '<div class="empty-state">No students added yet</div>';
+                return;
+            }
+            
+            list.innerHTML = students.map((student, index) => `
+                <div class="list-item fade-in">
+                    <span>${student}</span>
+                    <button onclick="removeStudent(${index})" class="btn-danger">Remove</button>
+                </div>
+            `).join('');
+        }
+
+        function renderTopics() {
+            const list = document.getElementById('topicList');
+            if (topics.length === 0) {
+                list.innerHTML = '<div class="empty-state">No topics added yet</div>';
+                return;
+            }
+            
+            list.innerHTML = topics.map((topic, index) => `
+                <div class="list-item fade-in">
+                    <span>${topic}</span>
+                    <button onclick="removeTopic(${index})" class="btn-danger">Remove</button>
+                </div>
+            `).join('');
+        }
+
+        function randomizeAssignments() {
+            if (students.length === 0 || topics.length === 0) {
+                alert('Please add both students and topics before randomizing!');
+                return;
+            }
+
+            // Create shuffled copies
+            const shuffledStudents = [...students].sort(() => Math.random() - 0.5);
+            const shuffledTopics = [...topics].sort(() => Math.random() - 0.5);
+
+            // Assign topics to students (repeat topics if more students than topics)
+            assignments = shuffledStudents.map((student, index) => ({
+                student: student,
+                topic: shuffledTopics[index % shuffledTopics.length]
+            }));
+
+            renderAssignments();
+            
+            // Show assignments section with animation
+            const section = document.getElementById('assignmentsSection');
+            section.style.display = 'block';
+            section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function renderAssignments() {
+            const list = document.getElementById('assignmentsList');
+            list.innerHTML = assignments.map(assignment => `
+                <div class="assignment-item fade-in">
+                    <div>
+                        <div class="student-name">${assignment.student}</div>
+                        <div class="topic-text">"${assignment.topic}"</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function clearAssignments() {
+            assignments = [];
+            document.getElementById('assignmentsSection').style.display = 'none';
+        }
+
+        // Allow Enter key to add items
+        document.getElementById('studentInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') addStudent();
+        });
+        
+        document.getElementById('topicInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') addTopic();
+        });
+    </script>
+</body>
+</html>
